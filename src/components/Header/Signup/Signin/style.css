@@ -2,7 +2,8 @@
     width: 70%;
     max-width: 450px;
     height: auto;
-    box-shadow: var(--shadow);
+    /* box-shadow: var(--shadow); */
+    box-shadow: 4px 6px 55px #007aff42;
     border-radius: 1rem ;
     padding: 1rem 1.5rem;
 }
@@ -15,8 +16,7 @@
 .p-login{
     text-align: center;
     font-weight: 300;
-    font-size: 0.8rem;
-    
+    font-size: 0.8rem; 
     margin: 0;
 
 }
