@@ -14,22 +14,14 @@ function ChartComponent({ sortedTransactions }) {
       amount: transaction.amount,
     }));
 
-  let finalSpendings = SpendingData.reduce((acc, obj) => {
-    let key = obj.tag;
-    if (!acc[key]) {
-      acc[key] = { tag: obj.tag, amount: obj.amount };
-    } else {
-      acc[key].amount += obj.amount;
-    }
-    return acc;
-  }, {});
-
-  let newSpendings = [
+  // Define default spending categories
+  const newSpendings = [
     { tag: 'food', amount: 0 },
     { tag: 'education', amount: 0 },
     { tag: 'office', amount: 0 },
   ];
 
+  // Accumulate spending amounts into predefined categories
   SpendingData.forEach((item) => {
     const found = newSpendings.find(spend => spend.tag === item.tag);
     if (found) {
