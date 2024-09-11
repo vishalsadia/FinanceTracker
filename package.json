@@ -20,12 +20,17 @@
     "reactstrap": "^9.2.2",
     "web-vitals": "^2.1.4"
   },
+  
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+
   },
+  "scripts": {
+     "lint": "eslint --ext=.jsx,.js,.tsx,.ts"
+},
   "eslintConfig": {
     "extends": [
       "react-app",
