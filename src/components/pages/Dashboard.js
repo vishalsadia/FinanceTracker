@@ -23,21 +23,15 @@ function Dashboard() {
   const [expense, setExpense] = useState(0);
   const [totalBalance, setTotalBalance] = useState(0);
 
-  const showExpenseModal = () => setIsExpenseModalVisible(true);
-  const showIncomeModal = () => setIsIncomeModalVisible(true);
-  const handleExpenseCancel = () => setIsExpenseModalVisible(false);
-  const handleIncomeCancel = () => setIsIncomeModalVisible(false);
+  // Function Definitions
+  const calculateBalance = useCallback(() => {
+    const incomeTotal = transactions.reduce((acc, curr) => curr.type === "income" ? acc + curr.amount : acc, 0);
+    const expenseTotal = transactions.reduce((acc, curr) => curr.type === "expense" ? acc + curr.amount : acc, 0);
 
-  const onFinish = (values, type) => {
-    const newTransaction = {
-      type,
-      date: values.date.format("YYYY-MM-DD"),
-      amount: parseFloat(values.amount),
-      tag: values.tag,
-      name: values.name,
-    };
-    addTransaction(newTransaction);
-  };
+    setIncome(incomeTotal);
+    setExpense(expenseTotal);
+    setTotalBalance(incomeTotal - expenseTotal);
+  }, [transactions]);
 
   const addTransaction = useCallback(async (transaction, many = false) => {
     try {
@@ -51,15 +45,6 @@ function Dashboard() {
       if (!many) toast.error("Couldn't add Transaction");
     }
   }, [user, calculateBalance]);
-
-  const calculateBalance = useCallback(() => {
-    const incomeTotal = transactions.reduce((acc, curr) => curr.type === "income" ? acc + curr.amount : acc, 0);
-    const expenseTotal = transactions.reduce((acc, curr) => curr.type === "expense" ? acc + curr.amount : acc, 0);
-
-    setIncome(incomeTotal);
-    setExpense(expenseTotal);
-    setTotalBalance(incomeTotal - expenseTotal);
-  }, [transactions]);
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
@@ -81,6 +66,7 @@ function Dashboard() {
     }
   }, [user]);
 
+  // Effect Hooks
   useEffect(() => {
     if (user) {
       fetchTransactions();
@@ -90,6 +76,23 @@ function Dashboard() {
   useEffect(() => {
     calculateBalance();
   }, [transactions, calculateBalance]);
+
+  // Helper Functions
+  const showExpenseModal = () => setIsExpenseModalVisible(true);
+  const showIncomeModal = () => setIsIncomeModalVisible(true);
+  const handleExpenseCancel = () => setIsExpenseModalVisible(false);
+  const handleIncomeCancel = () => setIsIncomeModalVisible(false);
+
+  const onFinish = (values, type) => {
+    const newTransaction = {
+      type,
+      date: values.date.format("YYYY-MM-DD"),
+      amount: parseFloat(values.amount),
+      tag: values.tag,
+      name: values.name,
+    };
+    addTransaction(newTransaction);
+  };
 
   const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
