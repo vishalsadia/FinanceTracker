@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../Header'; 
 import Cards from '../cards';
 // import { Modal } from 'antd';
@@ -39,39 +39,16 @@ function Dashboard() {
     addTransaction(newTransaction);
   };
 
-  async function addTransaction(transaction, many = false) {
-    try {
-      const docRef = await addDoc(collection(db, `users/${user.uid}/transactions`), transaction);
-      console.log("Document written with ID: ", docRef.id);
-      if (!many) toast.success("Transaction Added");
-      setTransactions((prevTransactions) => [...prevTransactions, transaction]);
-      calculateBalance();
-    } catch (e) {
-      console.error("Error adding document: ", e);
-      if (!many) toast.error("Couldn't add Transaction");
-    }
-  }
-
-  useEffect(() => {
-    if (user) {
-      fetchTransactions();
-    }
-  }, [user, fetchTransactions]); // Added 'fetchTransactions' to dependencies
-
-  useEffect(() => {
-    calculateBalance();
-  }, [transactions, calculateBalance]); // Added 'calculateBalance' to dependencies
-
-  const calculateBalance = () => {
+  const calculateBalance = useCallback(() => {
     const incomeTotal = transactions.reduce((acc, curr) => curr.type === "income" ? acc + curr.amount : acc, 0);
     const expenseTotal = transactions.reduce((acc, curr) => curr.type === "expense" ? acc + curr.amount : acc, 0);
 
     setIncome(incomeTotal);
     setExpense(expenseTotal);
     setTotalBalance(incomeTotal - expenseTotal);
-  };
+  }, [transactions]);
 
-  async function fetchTransactions() {
+  const fetchTransactions = useCallback(async () => {
     setLoading(true);
     if (user) {
       try {
@@ -89,7 +66,17 @@ function Dashboard() {
       toast.error("No user");
       setLoading(false);
     }
-  }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchTransactions();
+    }
+  }, [user, fetchTransactions]);
+
+  useEffect(() => {
+    calculateBalance();
+  }, [transactions, calculateBalance]);
 
   const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
