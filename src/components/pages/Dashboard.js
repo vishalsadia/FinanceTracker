@@ -56,11 +56,11 @@ function Dashboard() {
     if (user) {
       fetchTransactions();
     }
-  }, [user]);
+  }, [user, fetchTransactions]); // Added 'fetchTransactions' to dependencies
 
   useEffect(() => {
     calculateBalance();
-  }, [transactions]);
+  }, [transactions, calculateBalance]); // Added 'calculateBalance' to dependencies
 
   const calculateBalance = () => {
     const incomeTotal = transactions.reduce((acc, curr) => curr.type === "income" ? acc + curr.amount : acc, 0);
