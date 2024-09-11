@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../Header'; 
 import Cards from '../cards';
-import { Modal } from 'antd';
+// import { Modal } from 'antd';
 import AddExpenseModal from '../modals/addExpense';
 import AddIncomeModal from '../modals/addIncome';
 import { addDoc, collection, query, getDocs } from 'firebase/firestore';
