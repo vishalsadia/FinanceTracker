@@ -39,6 +39,19 @@ function Dashboard() {
     addTransaction(newTransaction);
   };
 
+  const addTransaction = useCallback(async (transaction, many = false) => {
+    try {
+      const docRef = await addDoc(collection(db, `users/${user.uid}/transactions`), transaction);
+      console.log("Document written with ID: ", docRef.id);
+      if (!many) toast.success("Transaction Added");
+      setTransactions((prevTransactions) => [...prevTransactions, transaction]);
+      calculateBalance();
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      if (!many) toast.error("Couldn't add Transaction");
+    }
+  }, [user, calculateBalance]);
+
   const calculateBalance = useCallback(() => {
     const incomeTotal = transactions.reduce((acc, curr) => curr.type === "income" ? acc + curr.amount : acc, 0);
     const expenseTotal = transactions.reduce((acc, curr) => curr.type === "expense" ? acc + curr.amount : acc, 0);
