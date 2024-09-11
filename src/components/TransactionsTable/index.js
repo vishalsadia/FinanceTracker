@@ -2,7 +2,7 @@ import { Input, Radio, Select, Table } from 'antd';
 import React, { useState } from 'react';
 import searchImg from '../../assets/search.svg';
 import { parse, unparse } from 'papaparse';
-import Header from '../Header';
+// import Header from '../Header';
 import { toast } from 'react-toastify';
 
 const { Option } = Select;
