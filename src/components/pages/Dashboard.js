@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 import moment from 'moment';
 import TransactionsTable from '../TransactionsTable';
 import ChartComponent from '../Charts';
-import NoTransactions from '../NoTransactions';
+import NoTransactions from '../TransactionsTable/NoTransactions';
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -23,25 +23,14 @@ function Dashboard() {
   const [expense, setExpense] = useState(0);
   const [totalBalance, setTotalBalance] = useState(0);
 
-  const showExpenseModal = () => {
-    setIsExpenseModalVisible(true);
-  };
-
-  const showIncomeModal = () => {
-    setIsIncomeModalVisible(true);
-  };
-
-  const handleExpenseCancel = () => {
-    setIsExpenseModalVisible(false);
-  };
-
-  const handleIncomeCancel = () => {
-    setIsIncomeModalVisible(false);
-  };
+  const showExpenseModal = () => setIsExpenseModalVisible(true);
+  const showIncomeModal = () => setIsIncomeModalVisible(true);
+  const handleExpenseCancel = () => setIsExpenseModalVisible(false);
+  const handleIncomeCancel = () => setIsIncomeModalVisible(false);
 
   const onFinish = (values, type) => {
     const newTransaction = {
-      type: type,
+      type,
       date: values.date.format("YYYY-MM-DD"),
       amount: parseFloat(values.amount),
       tag: values.tag,
@@ -64,7 +53,9 @@ function Dashboard() {
   }
 
   useEffect(() => {
-    fetchTransactions();
+    if (user) {
+      fetchTransactions();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -72,15 +63,9 @@ function Dashboard() {
   }, [transactions]);
 
   const calculateBalance = () => {
-    let incomeTotal = 0;
-    let expenseTotal = 0;
-    transactions.forEach((transaction) => {
-      if (transaction.type === "income") {
-        incomeTotal += transaction.amount;
-      } else {
-        expenseTotal += transaction.amount;
-      }
-    });
+    const incomeTotal = transactions.reduce((acc, curr) => curr.type === "income" ? acc + curr.amount : acc, 0);
+    const expenseTotal = transactions.reduce((acc, curr) => curr.type === "expense" ? acc + curr.amount : acc, 0);
+
     setIncome(incomeTotal);
     setExpense(expenseTotal);
     setTotalBalance(incomeTotal - expenseTotal);
@@ -89,29 +74,28 @@ function Dashboard() {
   async function fetchTransactions() {
     setLoading(true);
     if (user) {
-      const q = query(collection(db, `users/${user.uid}/transactions`));
-      const querySnapshot = await getDocs(q);
-      let transactionsArray = [];
-      querySnapshot.forEach(doc => {
-        transactionsArray.push(doc.data());
-      });
-      setTransactions(transactionsArray);
-      toast.success("Transactions Fetched");
+      try {
+        const q = query(collection(db, `users/${user.uid}/transactions`));
+        const querySnapshot = await getDocs(q);
+        const transactionsArray = querySnapshot.docs.map(doc => doc.data());
+        setTransactions(transactionsArray);
+        toast.success("Transactions Fetched");
+      } catch (e) {
+        toast.error("Error fetching transactions");
+      } finally {
+        setLoading(false);
+      }
     } else {
       toast.error("No user");
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
-  let sortedTransactions = transactions.sort((a, b) => {
-    return new Date(a.date) - new Date(b.date);
-  });
+  const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
     <div>
       <Header />
-
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -123,7 +107,7 @@ function Dashboard() {
             showExpenseModal={showExpenseModal}
             showIncomeModal={showIncomeModal}
           />
-          {transactions&& transactions.length != 0 ? (
+          {transactions.length > 0 ? (
             <ChartComponent sortedTransactions={sortedTransactions} />
           ) : (
             <NoTransactions />
@@ -140,8 +124,9 @@ function Dashboard() {
             handleIncomeCancel={handleIncomeCancel}
             onFinish={(values) => onFinish(values, 'income')}
           />
+
           <TransactionsTable 
-            transactions={transactions}
+            transactions={sortedTransactions}
             addTransaction={addTransaction}
             fetchTransactions={fetchTransactions}
           />  

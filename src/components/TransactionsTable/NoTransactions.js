@@ -8,13 +8,16 @@ import userImg from '../../assets/user.svg';
 
 
 
+
+
+
 function Header() {
     const [user, loading] = useAuthState(auth);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {
-            navigate(""); 
+            navigate("/"); // Navigate to home or intended route
         }
     }, [user, loading, navigate]);
 
